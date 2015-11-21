@@ -5,3 +5,7 @@
 GET     /management/landing-pages             controllers.LandingPageManagementApi.findAll
 PUT     /management/landing-pages             controllers.LandingPageManagementApi.add
 DELETE  /management/landing-pages/:id         controllers.LandingPageManagementApi.delete(id: String)
+
+GET     /management/developers                controllers.DeveloperManagementApi.findAll
+PUT     /management/developers                controllers.DeveloperManagementApi.add
+DELETE  /management/developers/:id            controllers.DeveloperManagementApi.delete(id: String)
