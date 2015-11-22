@@ -7,6 +7,7 @@ import javax.inject.Inject
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.bson._
 import repository.{LandingPageRepository, LandingPageAuditEventRepository}
+import services.Git
 import scala.concurrent.Future
 import play.api.Logger
 import play.api.mvc.{Action, Controller}
@@ -38,11 +39,7 @@ class LandingPageManagementApi extends Controller {
         LandingPageAuditEventRepository.logEvent(landingPage, "Created landing page", s"Name: ${landingPage.name}")
         Logger.info(s"Creating landing page ${landingPage.id}, name ${landingPage.name}")
 
-        // Clone the Git repository.
-        val gitTarget = s"/home/lph/landingpages/${landingPage.jobNumber}"
-        Process(s"git clone ${landingPage.gitUri} $gitTarget")
-        LandingPageAuditEventRepository.logEvent(landingPage, "Cloned repository", s"Cloned Git repository ${landingPage.gitUri} to $gitTarget")
-        Logger.info(s"Cloned ${landingPage.gitUri} to $gitTarget")
+        Git.cloneLandingPage(landingPage)
 
         // Insert the landing page and wait for it to be inserted, so we can then get the new count of landing pages.
         val futures = for {
