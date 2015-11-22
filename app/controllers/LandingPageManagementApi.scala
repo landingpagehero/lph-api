@@ -6,7 +6,7 @@ import play.api.libs.json._
 import javax.inject.Inject
 import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.bson._
-import repository.LandingPageAuditEventRepository
+import repository.{LandingPageRepository, LandingPageAuditEventRepository}
 import scala.concurrent.Future
 import play.api.Logger
 import play.api.mvc.{Action, Controller}
@@ -21,15 +21,7 @@ case class LandingPageForm(jobNumber: String, name: String, gitUri: String) {
   def toLandingPage: LandingPage = LandingPage(jobNumber, name, gitUri)
 }
 
-class LandingPageManagementApi @Inject()(val reactiveMongoApi: ReactiveMongoApi)
-  extends Controller
-  with MongoController
-  with ReactiveMongoComponents {
-
-  def landingPagesCollection: BSONCollection = db.collection[BSONCollection]("landingPages")
-
-  implicit val readerForLandingPages = LandingPage.LandingPageBSONReader
-  implicit val writeForLandingPages = LandingPage.LandingPageBSONWriter
+class LandingPageManagementApi extends Controller {
 
   /**
    * Create a landing page.
@@ -54,8 +46,8 @@ class LandingPageManagementApi @Inject()(val reactiveMongoApi: ReactiveMongoApi)
 
         // Insert the landing page and wait for it to be inserted, so we can then get the new count of landing pages.
         val futures = for {
-          writeResult <- landingPagesCollection.insert(landingPage)
-          count <- landingPagesCollection.count()
+          writeResult <- LandingPageRepository.insert(landingPage)
+          count <- LandingPageRepository.count()
         } yield count
 
         futures.map { count =>
@@ -74,11 +66,7 @@ class LandingPageManagementApi @Inject()(val reactiveMongoApi: ReactiveMongoApi)
    * Find all landing pages, sorted with newest first.
    */
   def findAll = Action.async {
-    landingPagesCollection
-      .find(BSONDocument())
-      .sort(BSONDocument("createdAt" -> -1))
-      .cursor[LandingPage]()
-      .collect[List]()
+    LandingPageRepository.findAll()
       .map { landingPages =>
         Ok(Json.obj(
           "landingPages" -> landingPages.map(lp => lp.toJson),
@@ -91,14 +79,9 @@ class LandingPageManagementApi @Inject()(val reactiveMongoApi: ReactiveMongoApi)
    * Find one landing page.
    */
   def findOne(id: String) = Action.async {
-    val bsonId = BSONObjectID(id)
-
-    landingPagesCollection
-      .find(BSONDocument("_id" -> bsonId))
-      .cursor[LandingPage]()
-      .collect[List](1)
-      .map { landingPages =>
-        val landingPage = landingPages.head
+    LandingPageRepository
+      .findOne(id)
+      .map { landingPage =>
         Ok(Json.obj(
           "landingPage" -> landingPage.toJson
         ))
@@ -122,9 +105,7 @@ class LandingPageManagementApi @Inject()(val reactiveMongoApi: ReactiveMongoApi)
    * Delete a landing page.
    */
   def delete(id: String) = Action { request =>
-    landingPagesCollection.remove(BSONDocument({
-      "_id" -> BSONObjectID(id)
-    }))
+    LandingPageRepository.remove(id)
 
     Logger.info(s"Deleted landing page $id");
 
