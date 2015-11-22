@@ -2,10 +2,12 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET     /management/landing-pages             controllers.LandingPageManagementApi.findAll
-PUT     /management/landing-pages             controllers.LandingPageManagementApi.add
-DELETE  /management/landing-pages/:id         controllers.LandingPageManagementApi.delete(id: String)
+GET     /management/landing-pages                               controllers.LandingPageManagementApi.findAll
+GET     /management/landing-pages/$id<[a-f0-9]{24}>             controllers.LandingPageManagementApi.findOne(id: String)
+GET     /management/landing-pages/$id<[a-f0-9]{24}>/audit-log   controllers.LandingPageManagementApi.findOneAuditLog(id: String)
+PUT     /management/landing-pages                               controllers.LandingPageManagementApi.add
+DELETE  /management/landing-pages/$id<[a-f0-9]{24}>             controllers.LandingPageManagementApi.delete(id: String)
 
-GET     /management/developers                controllers.DeveloperManagementApi.findAll
-PUT     /management/developers                controllers.DeveloperManagementApi.add
-DELETE  /management/developers/:id            controllers.DeveloperManagementApi.delete(id: String)
+GET     /management/developers                                  controllers.DeveloperManagementApi.findAll
+PUT     /management/developers                                  controllers.DeveloperManagementApi.add
+DELETE  /management/developers/$id<[a-f0-9]{24}>                controllers.DeveloperManagementApi.delete(id: String)

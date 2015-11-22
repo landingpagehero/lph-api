@@ -1,6 +1,6 @@
 package controllers
 
-import models.LandingPage
+import models.{LandingPageAuditEvent, LandingPage}
 import play.api.mvc._
 import play.api.libs.json._
 import javax.inject.Inject
@@ -14,6 +14,8 @@ import play.api.libs.json._
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 import play.modules.reactivemongo.json._
 
+import scala.sys.process.Process
+
 case class LandingPageForm(jobNumber: String, name: String, gitUri: String) {
   def toLandingPage: LandingPage = LandingPage(jobNumber, name, gitUri)
 }
@@ -25,8 +27,13 @@ class LandingPageManagementApi @Inject()(val reactiveMongoApi: ReactiveMongoApi)
 
   def landingPagesCollection: BSONCollection = db.collection[BSONCollection]("landingPages")
 
-  implicit val reader = LandingPage.LandingPageBSONReader
-  implicit val write = LandingPage.LandingPageBSONWriter
+  def landingPageAuditEventsCollection: BSONCollection = db.collection[BSONCollection]("landingPageAuditEvents")
+
+  implicit val readerForLandingPages = LandingPage.LandingPageBSONReader
+  implicit val writeForLandingPages = LandingPage.LandingPageBSONWriter
+
+  implicit val readerForAuditEvents = LandingPageAuditEvent.LandingPageAuditEventBSONReader
+  implicit val writeForAuditEvents = LandingPageAuditEvent.LandingPageAuditEventBSONWriter
 
   /**
    * Create a landing page.
@@ -39,8 +46,25 @@ class LandingPageManagementApi @Inject()(val reactiveMongoApi: ReactiveMongoApi)
       valid = form => {
         val landingPage = form.toLandingPage
 
-        Logger.info(s"Created landing page ${landingPage.id}");
+        // Log the creation of the landing page.
+        landingPageAuditEventsCollection.insert(new LandingPageAuditEvent(
+          BSONObjectID(landingPage.id),
+          "Created landing page",
+          s"Name: ${landingPage.name}"
+        ))
+        Logger.info(s"Creating landing page ${landingPage.id}, name ${landingPage.name}")
 
+        // Clone the Git repository.
+        val gitTarget = s"/home/lph/landingpages/${landingPage.jobNumber}"
+        Process(s"git clone ${landingPage.gitUri} $gitTarget")
+        landingPageAuditEventsCollection.insert(new LandingPageAuditEvent(
+          BSONObjectID(landingPage.id),
+          "Cloned repository",
+          s"Cloned Git repository ${landingPage.gitUri} to $gitTarget"
+        ))
+        Logger.info(s"Cloned ${landingPage.gitUri} to $gitTarget")
+
+        // Insert the landing page.
         landingPagesCollection
           .insert(landingPage)
           .map(_ => Created(Json.obj(
@@ -65,6 +89,42 @@ class LandingPageManagementApi @Inject()(val reactiveMongoApi: ReactiveMongoApi)
         Ok(Json.obj(
           "landingPages" -> landingPages.map(lp => lp.toJson),
           "count" -> landingPages.length
+        ))
+      }
+  }
+
+  /**
+   * Find one landing page.
+   */
+  def findOne(id: String) = Action.async {
+    val bsonId = BSONObjectID(id)
+
+    landingPagesCollection
+      .find(BSONDocument("_id" -> bsonId))
+      .cursor[LandingPage]()
+      .collect[List](1)
+      .map { landingPages =>
+        val landingPage = landingPages.head
+        Ok(Json.obj(
+          "landingPage" -> landingPage.toJson
+        ))
+      }
+  }
+
+  /**
+   * Find one landing page's audit log.
+   */
+  def findOneAuditLog(id: String) = Action.async {
+    val bsonId = BSONObjectID(id)
+
+    landingPageAuditEventsCollection
+      .find(BSONDocument("landingPage" -> bsonId))
+      .sort(BSONDocument("createdAt" -> -1))
+      .cursor[LandingPageAuditEvent]()
+      .collect[List]()
+      .map { events =>
+        Ok(Json.obj(
+          "auditLog" -> events.map{_.toJson}
         ))
       }
   }
