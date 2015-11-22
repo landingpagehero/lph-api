@@ -5,6 +5,7 @@ import play.api.mvc._
 import play.api.libs.json._
 import javax.inject.Inject
 import reactivemongo.api.collections.bson.BSONCollection
+import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson._
 import scala.concurrent.Future
 import play.api.Logger
@@ -64,14 +65,20 @@ class LandingPageManagementApi @Inject()(val reactiveMongoApi: ReactiveMongoApi)
         ))
         Logger.info(s"Cloned ${landingPage.gitUri} to $gitTarget")
 
-        // Insert the landing page.
-        landingPagesCollection
-          .insert(landingPage)
-          .map(_ => Created(Json.obj(
+        // Insert the landing page and wait for it to be inserted, so we can then get the new count of landing pages.
+        val futures = for {
+          writeResult <- landingPagesCollection.insert(landingPage)
+          count <- landingPagesCollection.count()
+        } yield count
+
+        futures.map { count =>
+          Created(Json.obj(
             "created" -> true,
             "message" -> s"You created landing page ${landingPage.name} (${landingPage.jobNumber}). The Git URI is '${landingPage.gitUri}'.",
-            "landingPage" -> landingPage.toJson
-          )))
+            "landingPage" -> landingPage.toJson,
+            "count" -> count
+          ))
+        }
       }
     )
   }
