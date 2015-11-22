@@ -3,30 +3,19 @@ package controllers
 import models.Developer
 import play.api.mvc._
 import play.api.libs.json._
-import javax.inject.Inject
-import reactivemongo.api.collections.bson.BSONCollection
-import reactivemongo.bson._
+import repository.DeveloperRepository
 import scala.concurrent.Future
 import play.api.Logger
 import play.api.mvc.{Action, Controller}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
-import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 import play.modules.reactivemongo.json._
 
 case class DeveloperForm(githubUsername: String, realName: String, email: String) {
-  def toDeveloper: Developer = Developer(githubUsername , realName, email)
+  def toDeveloper: Developer = Developer(githubUsername, realName, email)
 }
 
-class DeveloperManagementApi @Inject()(val reactiveMongoApi: ReactiveMongoApi)
-  extends Controller
-  with MongoController
-  with ReactiveMongoComponents {
-
-  def developersCollection: BSONCollection = db.collection[BSONCollection]("developers")
-
-  implicit val reader = Developer.DeveloperBSONReader
-  implicit val write = Developer.DeveloperBSONWriter
+class DeveloperManagementApi extends Controller {
 
   /**
    * Create a developer.
@@ -41,7 +30,7 @@ class DeveloperManagementApi @Inject()(val reactiveMongoApi: ReactiveMongoApi)
 
         Logger.info(s"Created developer ${developer.id}");
 
-        developersCollection
+        DeveloperRepository
           .insert(developer)
           .map(_ => Created(Json.obj(
             "created" -> true,
@@ -55,11 +44,8 @@ class DeveloperManagementApi @Inject()(val reactiveMongoApi: ReactiveMongoApi)
    * Find all developers, sorted with newest first.
    */
   def findAll = Action.async {
-    developersCollection
-      .find(BSONDocument())
-      .sort(BSONDocument("createdAt" -> -1))
-      .cursor[Developer]()
-      .collect[List]()
+    DeveloperRepository
+      .findAll()
       .map { developers =>
         Ok(Json.obj(
           "developers" -> developers.map(developer => developer.toJson),
@@ -72,9 +58,7 @@ class DeveloperManagementApi @Inject()(val reactiveMongoApi: ReactiveMongoApi)
    * Delete a developer.
    */
   def delete(id: String) = Action { request =>
-    developersCollection.remove(BSONDocument({
-      "_id" -> BSONObjectID(id)
-    }))
+    DeveloperRepository.remove(id)
 
     Logger.info(s"Deleted developer $id");
 
