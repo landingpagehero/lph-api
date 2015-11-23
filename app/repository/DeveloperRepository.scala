@@ -33,20 +33,18 @@ object DeveloperRepository {
       .collect[List]()
   }
 
-  def findOne(id: String): Future[Developer] = {
+  def findOne(id: String): Future[Option[Developer]] = {
     val bsonId = BSONObjectID(id)
 
     collection
       .find(BSONDocument("_id" -> bsonId))
-      .cursor[Developer]()
-      .collect[List](1)
-      .map(developers => developers.head)
+      .one[Developer]
   }
 
   def remove(id: String) = {
-    collection.remove(BSONDocument({
+    collection.remove(BSONDocument(
       "_id" -> BSONObjectID(id)
-    }))
+    ))
   }
 
 }

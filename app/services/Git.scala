@@ -6,10 +6,9 @@ import scala.sys.process._
 import models.LandingPage
 import play.api.Logger
 import repository.{LandingPageRepository, LandingPageAuditEventRepository}
-import java.lang.RuntimeException
 
 object Git {
-  val clonePath = "/home/lph/landingpages/clones";
+  val clonePath = "/home/lph/landingpages/clones"
 
   /**
    * Clone a landing page's Git repository to the server.
@@ -21,7 +20,7 @@ object Git {
 
     Logger.info(s"Running: git clone ${landingPage.gitUri} $gitTarget")
     val cloneResult = try {
-      s"git clone ${landingPage.gitUri} $gitTarget" !!;
+      s"git clone ${landingPage.gitUri} $gitTarget" !!
     } catch {
       case e: RuntimeException => return s"Could not clone ${landingPage.gitUri}"
     }
@@ -35,14 +34,13 @@ object Git {
   /**
    * Get all commits in the given branch.
    *
-   * @param landingPage
    * @return The commit log, or an error message.
    */
   def getCommits(landingPage: LandingPage, branch: String): String = {
     val gitTarget = getLocalClonePath(landingPage)
 
     val fetchResult = try {
-      s"git -C $gitTarget fetch" !!;
+      s"git -C $gitTarget fetch" !!
     } catch {
       case e: RuntimeException => {
         LandingPageAuditEventRepository.logEvent(landingPage, "Failed to fetch repository", e.getMessage)
@@ -57,7 +55,7 @@ object Git {
     LandingPageAuditEventRepository.logEvent(landingPage, "Fetched repository", fetchResult)
 
     val logResult = try {
-      s"git -C $gitTarget log --no-merges $branch" !!;
+      s"git -C $gitTarget log --no-merges $branch" !!
     } catch {
       case e: RuntimeException => {
         LandingPageAuditEventRepository.logEvent(landingPage, s"Failed to get log from Git branch", s"Branch: $branch")

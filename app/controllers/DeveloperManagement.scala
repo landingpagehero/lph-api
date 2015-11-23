@@ -28,7 +28,7 @@ class DeveloperManagementApi extends Controller {
       valid = form => {
         val developer = form.toDeveloper
 
-        Logger.info(s"Created developer ${developer.id}");
+        Logger.info(s"Created developer ${developer.id}")
 
         DeveloperRepository
           .insert(developer)
@@ -60,7 +60,7 @@ class DeveloperManagementApi extends Controller {
   def delete(id: String) = Action { request =>
     DeveloperRepository.remove(id)
 
-    Logger.info(s"Deleted developer $id");
+    Logger.info(s"Deleted developer $id")
 
     Ok(Json.obj(
       "deleted" -> true

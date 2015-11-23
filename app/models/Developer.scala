@@ -19,11 +19,11 @@ case class Developer(
    * Serialize the developer as JSON.
    */
   def toJson = Json.obj(
-    "id" -> this.id,
-    "githubUsername" -> this.githubUsername,
-    "realName" -> this.realName,
-    "email" -> this.email,
-    "createdAt" -> this.createdAt.toString
+    "id" -> id,
+    "githubUsername" -> githubUsername,
+    "realName" -> realName,
+    "email" -> email,
+    "createdAt" -> createdAt.toString
   )
 }
 

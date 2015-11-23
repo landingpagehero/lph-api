@@ -19,10 +19,10 @@ case class LandingPageAuditEvent(
    * Serialize the event as JSON.
    */
   def toJson = Json.obj(
-    "id" -> this.id,
-    "eventType" -> this.eventType,
-    "message" -> this.message,
-    "createdAt" -> this.createdAt.toString
+    "id" -> id,
+    "eventType" -> eventType,
+    "message" -> message,
+    "createdAt" -> createdAt.toString
   )
 }
 

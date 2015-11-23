@@ -3,9 +3,6 @@ package controllers
 import models.LandingPage
 import play.api.mvc._
 import play.api.libs.json._
-import javax.inject.Inject
-import reactivemongo.api.collections.bson.BSONCollection
-import reactivemongo.bson._
 import repository.{LandingPageRepository, LandingPageAuditEventRepository}
 import services.Git
 import scala.concurrent.Future
@@ -13,10 +10,7 @@ import play.api.Logger
 import play.api.mvc.{Action, Controller}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
-import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
 import play.modules.reactivemongo.json._
-
-import scala.sys.process.Process
 
 case class LandingPageForm(jobNumber: String, name: String, gitUri: String) {
   def toLandingPage: LandingPage = LandingPage(jobNumber, name, gitUri)
@@ -80,7 +74,7 @@ class LandingPageManagementApi extends Controller {
       .findOne(id)
       .map { landingPage =>
         Ok(Json.obj(
-          "landingPage" -> landingPage.toJson
+          "landingPage" -> landingPage.get.toJson
         ))
       }
   }
@@ -89,7 +83,7 @@ class LandingPageManagementApi extends Controller {
    * Find one landing page's audit log.
    */
   def findOneAuditLog(id: String) = Action.async {
-    LandingPageAuditEventRepository.getAuditLog((id)).map { events =>
+    LandingPageAuditEventRepository.getAuditLog(id).map { events =>
       Ok(Json.obj(
         "auditLog" -> events.map {
           _.toJson
@@ -105,7 +99,7 @@ class LandingPageManagementApi extends Controller {
     LandingPageRepository
       .findOne(id)
       .map { landingPage =>
-        val commits = Git.getCommits(landingPage, branch)
+        val commits = Git.getCommits(landingPage.get, branch)
 
         Ok(Json.obj(
           "codeChanges" -> commits
@@ -119,7 +113,7 @@ class LandingPageManagementApi extends Controller {
   def delete(id: String) = Action { request =>
     LandingPageRepository.remove(id)
 
-    Logger.info(s"Deleted landing page $id");
+    Logger.info(s"Deleted landing page $id")
 
     Ok(Json.obj(
       "deleted" -> true

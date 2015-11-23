@@ -32,25 +32,23 @@ object LandingPageRepository {
       .collect[List]()
   }
 
-  def findOne(id: String): Future[LandingPage] = {
+  def findOne(id: String): Future[Option[LandingPage]] = {
     val bsonId = BSONObjectID(id)
 
     collection
       .find(BSONDocument("_id" -> bsonId))
-      .cursor[LandingPage]()
-      .collect[List](1)
-      .map( landingPages => landingPages.head )
+      .one[LandingPage]
   }
 
   def remove(id: String) = {
-    collection.remove(BSONDocument({
+    collection.remove(BSONDocument(
       "_id" -> BSONObjectID(id)
-    }))
+    ))
   }
 
   def update(landingPage: LandingPage) = {
     collection.update(
-      BSONDocument({"_id" -> BSONObjectID(landingPage.id)}),
+      BSONDocument("_id" -> BSONObjectID(landingPage.id)),
       landingPage
     )
   }

@@ -17,7 +17,7 @@ object LandingPageAuditEventRepository {
   private implicit val writer = LandingPageAuditEvent.LandingPageAuditEventBSONWriter
 
   def getAuditLog(id: String): Future[List[LandingPageAuditEvent]] = {
-    this.collection
+    collection
       .find(BSONDocument("landingPage" -> BSONObjectID(id)))
       .sort(BSONDocument("createdAt" -> -1))
       .cursor[LandingPageAuditEvent]()
@@ -26,7 +26,7 @@ object LandingPageAuditEventRepository {
 
   def logEvent(landingPage: LandingPage, eventType: String, message: String) = {
     val event = new LandingPageAuditEvent(BSONObjectID(landingPage.id), eventType, message)
-    this.collection.insert(event)
+    collection.insert(event)
   }
 
 }

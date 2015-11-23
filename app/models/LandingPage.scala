@@ -20,11 +20,11 @@ case class LandingPage(
    * Serialize the landing page as JSON.
    */
   def toJson = Json.obj(
-    "id" -> this.id,
-    "jobNumber" -> this.jobNumber,
-    "gitUri" -> this.gitUri,
-    "name" -> this.name,
-    "createdAt" -> this.createdAt.toString,
+    "id" -> id,
+    "jobNumber" -> jobNumber,
+    "gitUri" -> gitUri,
+    "name" -> name,
+    "createdAt" -> createdAt.toString,
     "lastFetchedRepoAt" -> {
       if (lastFetchedRepoAt.isDefined) lastFetchedRepoAt.get.toString
       else JsNull
