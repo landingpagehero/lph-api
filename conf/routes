@@ -5,6 +5,7 @@
 GET     /management/landing-pages                               controllers.LandingPageManagementApi.findAll
 GET     /management/landing-pages/$id<[a-f0-9]{24}>             controllers.LandingPageManagementApi.findOne(id: String)
 GET     /management/landing-pages/$id<[a-f0-9]{24}>/audit-log   controllers.LandingPageManagementApi.findOneAuditLog(id: String)
+GET     /management/landing-pages/$id<[a-f0-9]{24}>/code-changes-log/:branch  controllers.LandingPageManagementApi.findOneCodeChangesLog(id: String, branch: String)
 PUT     /management/landing-pages                               controllers.LandingPageManagementApi.add
 DELETE  /management/landing-pages/$id<[a-f0-9]{24}>             controllers.LandingPageManagementApi.delete(id: String)
 

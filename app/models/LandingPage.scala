@@ -1,7 +1,7 @@
 package models
 
 import org.joda.time.DateTime
-import play.api.libs.json.Json
+import play.api.libs.json.{JsNull, Json}
 import reactivemongo.bson._
 import play.modules.reactivemongo.json.BSONFormats._
 
@@ -13,7 +13,8 @@ case class LandingPage(
                         name: String,
                         gitUri: String,
                         id: String = BSONObjectID.generate.stringify,
-                        createdAt: DateTime = new DateTime
+                        createdAt: DateTime = new DateTime,
+                        var lastFetchedRepoAt: Option[DateTime] = None
                         ) {
   /**
    * Serialize the landing page as JSON.
@@ -23,7 +24,11 @@ case class LandingPage(
     "jobNumber" -> this.jobNumber,
     "gitUri" -> this.gitUri,
     "name" -> this.name,
-    "createdAt" -> this.createdAt.toString
+    "createdAt" -> this.createdAt.toString,
+    "lastFetchedRepoAt" -> {
+      if (lastFetchedRepoAt.isDefined) lastFetchedRepoAt.get.toString
+      else JsNull
+    }
   )
 }
 
@@ -36,7 +41,8 @@ object LandingPage {
         document.getAs[BSONString]("name").get.value,
         document.getAs[BSONString]("gitUri").get.value,
         document.getAs[BSONObjectID]("_id").get.stringify,
-        document.getAs[BSONDateTime]("createdAt").map(dt => new DateTime(dt.value)).get
+        document.getAs[BSONDateTime]("createdAt").map(dt => new DateTime(dt.value)).get,
+        document.getAs[BSONDateTime]("lastFetchedRepoAt").map(dt => new DateTime(dt.value))
       )
     }
   }
@@ -48,7 +54,11 @@ object LandingPage {
         "jobNumber" -> BSONString(landingPage.jobNumber),
         "name" -> BSONString(landingPage.name),
         "createdAt" -> BSONDateTime(landingPage.createdAt.getMillis),
-        "gitUri" -> BSONString(landingPage.gitUri)
+        "gitUri" -> BSONString(landingPage.gitUri),
+        "lastFetchedRepoAt" -> Option[BSONDateTime](
+          if (landingPage.lastFetchedRepoAt.isDefined) BSONDateTime(landingPage.lastFetchedRepoAt.get.getMillis)
+          else null
+        )
       )
     }
   }

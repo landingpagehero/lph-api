@@ -48,4 +48,11 @@ object LandingPageRepository {
     }))
   }
 
+  def update(landingPage: LandingPage) = {
+    collection.update(
+      BSONDocument({"_id" -> BSONObjectID(landingPage.id)}),
+      landingPage
+    )
+  }
+
 }

@@ -99,6 +99,21 @@ class LandingPageManagementApi extends Controller {
   }
 
   /**
+   * Find one landing page's code changes log (i.e. the Git log).
+   */
+  def findOneCodeChangesLog(id: String, branch: String) = Action.async {
+    LandingPageRepository
+      .findOne(id)
+      .map { landingPage =>
+        val commits = Git.getCommits(landingPage, branch)
+
+        Ok(Json.obj(
+          "codeChanges" -> commits
+        ))
+      }
+  }
+
+  /**
    * Delete a landing page.
    */
   def delete(id: String) = Action { request =>
