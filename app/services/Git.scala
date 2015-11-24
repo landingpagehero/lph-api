@@ -3,7 +3,7 @@ package services
 import org.joda.time.DateTime
 
 import scala.sys.process._
-import models.{DeploymentEnvironment, LandingPage}
+import models._
 import play.api.Logger
 import repository.{LandingPageRepository, LandingPageAuditEventRepository}
 
@@ -27,6 +27,9 @@ object Git {
 
     LandingPageAuditEventRepository.logEvent(landingPage, "Cloned repository", s"Cloned Git repository ${landingPage.gitUri} to $gitTarget:\n$cloneResult")
     Logger.info(s"Cloned ${landingPage.gitUri} to $gitTarget: $cloneResult")
+
+    deploy(landingPage, "master", Prod)
+    deploy(landingPage, "master", Staging)
 
     cloneResult
   }
