@@ -30,6 +30,16 @@ case class LandingPage(
       else JsNull
     }
   )
+
+  def getProdUrl = s"http://${jobNumber.toLowerCase}-prod.lph-sites.dev/"
+
+  def getStagingUrl = s"http://${jobNumber.toLowerCase}-staging.lph-sites.dev/"
+
+  def getUrlForEnv(env: DeploymentEnvironment) = {
+    if (env.getClass == Prod.getClass) getProdUrl
+    else if (env.getClass == Staging.getClass) getStagingUrl
+    else throw new Exception("Unknown deployment environment: " + env.envName)
+  }
 }
 
 object LandingPage {

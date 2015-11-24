@@ -3,7 +3,7 @@ package services
 import org.joda.time.DateTime
 
 import scala.sys.process._
-import models.LandingPage
+import models.{DeploymentEnvironment, LandingPage}
 import play.api.Logger
 import repository.{LandingPageRepository, LandingPageAuditEventRepository}
 
@@ -64,6 +64,21 @@ object Git {
     }
 
     logResult
+  }
+
+  /**
+   * Deploy the landing page's given branch to the given environment.
+   */
+  def deploy(landingPage: LandingPage, branch: String, targetEnv: DeploymentEnvironment) = {
+    val deployTarget = s"${targetEnv.path}/${landingPage.jobNumber}"
+    val from = getLocalClonePath(landingPage)
+
+    s"rm -fr $deployTarget" !!;
+    s"git clone $from $deployTarget" !!;
+    s"git -C $deployTarget reset $branch --hard" !!
+
+    LandingPageAuditEventRepository.logEvent(landingPage, s"Deployed to ${targetEnv.envName}", landingPage.getUrlForEnv(targetEnv))
+    Logger.info(s"Deployed landing page ${landingPage.id} to ${targetEnv.envName}. URL is ${landingPage.getUrlForEnv(targetEnv)}")
   }
 
   private def getLocalClonePath(landingPage: LandingPage): String = {

@@ -1,6 +1,6 @@
 package controllers
 
-import models.LandingPage
+import models.{Staging, Prod, LandingPage}
 import play.api.mvc._
 import play.api.libs.json._
 import repository.{LandingPageRepository, LandingPageAuditEventRepository}
@@ -118,5 +118,31 @@ class LandingPageManagementApi extends Controller {
     Ok(Json.obj(
       "deleted" -> true
     ))
+  }
+
+  def deployToProd(id: String, branch: String) = Action.async { request =>
+    LandingPageRepository
+      .findOne(id)
+      .map { maybeLandingPage =>
+        Git.deploy(maybeLandingPage.get, branch, Prod)
+
+        Ok(Json.obj(
+          "deployed" -> true,
+          "url" -> maybeLandingPage.get.getUrlForEnv(Prod)
+        ))
+      }
+  }
+
+  def deployToStaging(id: String, branch: String) = Action.async { request =>
+    LandingPageRepository
+      .findOne(id)
+      .map { maybeLandingPage =>
+        Git.deploy(maybeLandingPage.get, branch, Staging)
+
+        Ok(Json.obj(
+          "deployed" -> true,
+          "url" -> maybeLandingPage.get.getUrlForEnv(Staging)
+        ))
+      }
   }
 }
