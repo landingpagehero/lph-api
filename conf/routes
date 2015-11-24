@@ -15,3 +15,6 @@ DELETE  /management/landing-pages/$id<[a-f0-9]{24}>             controllers.Land
 GET     /management/developers                                  controllers.DeveloperManagementApi.findAll
 PUT     /management/developers                                  controllers.DeveloperManagementApi.add
 DELETE  /management/developers/$id<[a-f0-9]{24}>                controllers.DeveloperManagementApi.delete(id: String)
+
+GET     /serve-sites/                                           controllers.ServeSites.serveFile(path: String = "")
+GET     /serve-sites/$path<.+>                                  controllers.ServeSites.serveFile(path: String)

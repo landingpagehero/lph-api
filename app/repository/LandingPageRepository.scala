@@ -5,7 +5,7 @@ import play.api.Play
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.modules.reactivemongo.ReactiveMongoApi
 import reactivemongo.api.collections.bson.BSONCollection
-import reactivemongo.bson.{BSONObjectID, BSONDocument}
+import reactivemongo.bson.{BSONRegex, BSONObjectID, BSONDocument}
 import scala.concurrent.Future
 
 object LandingPageRepository {
@@ -37,6 +37,12 @@ object LandingPageRepository {
 
     collection
       .find(BSONDocument("_id" -> bsonId))
+      .one[LandingPage]
+  }
+
+  def findOneByJobNumberCaseInsensitive(jobNumber: String): Future[Option[LandingPage]] = {
+    collection
+      .find(BSONDocument("jobNumber" -> BSONRegex(jobNumber, "i")))
       .one[LandingPage]
   }
 
