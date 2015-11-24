@@ -28,7 +28,9 @@ case class LandingPage(
     "lastFetchedRepoAt" -> {
       if (lastFetchedRepoAt.isDefined) lastFetchedRepoAt.get.toString
       else JsNull
-    }
+    },
+    "prodUrl" -> getProdUrl,
+    "stagingUrl" -> getStagingUrl
   )
 
   def getProdUrl = s"http://${jobNumber.toLowerCase}-prod.lph-sites.dev/"
