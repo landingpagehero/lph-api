@@ -58,7 +58,7 @@ object Git {
     LandingPageAuditEventRepository.logEvent(landingPage, "Fetched repository", fetchResult)
 
     val logResult = try {
-      s"git -C $gitTarget log --no-merges $branch" !!
+      s"git -C $gitTarget log --no-merges origin/$branch" !!
     } catch {
       case e: RuntimeException => {
         LandingPageAuditEventRepository.logEvent(landingPage, s"Failed to get log from Git branch", s"Branch: $branch")
@@ -77,8 +77,9 @@ object Git {
     val from = getLocalClonePath(landingPage)
 
     s"rm -fr $deployTarget" !!;
-    s"git clone $from $deployTarget" !!;
-    s"git -C $deployTarget reset $branch --hard" !!
+    s"cp -R $from $deployTarget" !!;
+    s"git -C $deployTarget fetch origin" !!;
+    s"git -C $deployTarget reset origin/$branch --hard" !!
 
     LandingPageAuditEventRepository.logEvent(landingPage, s"Deployed to ${targetEnv.envName}", landingPage.getUrlForEnv(targetEnv))
     Logger.info(s"Deployed landing page ${landingPage.id} to ${targetEnv.envName}. URL is ${landingPage.getUrlForEnv(targetEnv)}")
