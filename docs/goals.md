@@ -7,7 +7,7 @@ Goals
 * Hosts simple static landing pages.
 * Allows landing page forms to be submitted and stored in a MongoDB database.
 * Allows each site to be deployed to it's own Digital Ocean droplet easily.
-* Allows deployment through a Jenkins job.
+* Allows deployment through a web page.
 * Tracks everything to a MongoDB database - including downloads (e.g. PDFs in the landing page) and page views.
 * Injects tracking Javascript into the pages automatically.
 * Injects configured dev SSH keys into the server and creates individual user accounts for them.
