@@ -42,7 +42,7 @@ case class LandingPage(
   def getUrlForEnv(env: DeploymentEnvironment) = {
     if (env.getClass == Prod.getClass) getProdUrl
     else if (env.getClass == Staging.getClass) getStagingUrl
-    else throw new Exception("Unknown deployment environment: " + env.envName)
+    else throw new Exception("Unknown deployment environment: " + env)
   }
 }
 

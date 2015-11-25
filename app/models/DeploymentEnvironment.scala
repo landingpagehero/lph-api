@@ -1,7 +1,9 @@
 package models
 
-case class DeploymentEnvironment(envName: String) {
+case class DeploymentEnvironment(private val envName: String) {
   val path = s"/home/lph/landingpages/$envName"
+
+  override def toString = envName
 }
 
 object DeploymentEnvironment {

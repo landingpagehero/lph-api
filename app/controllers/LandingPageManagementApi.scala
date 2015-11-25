@@ -95,7 +95,7 @@ class LandingPageManagementApi extends Controller {
   /**
    * Find one landing page's code changes log (i.e. the Git log).
    */
-  def findOneCodeChangesLog(id: String, branch: String) = Action.async {
+  def findOneCodeChangesLog(id: String, branch: Branch) = Action.async {
     LandingPageRepository
       .findOne(id)
       .map { landingPage =>
@@ -110,7 +110,7 @@ class LandingPageManagementApi extends Controller {
   /**
    * Find one landing page's user events log (i.e. page views).
    */
-  def findOneUserEventLog(id: String, env: String) = Action.async {
+  def findOneUserEventLog(id: String, env: DeploymentEnvironment) = Action.async {
     LandingPageUserEventRepository.getEventLog(id, env)
       .map { events =>
         Ok(Json.obj(
@@ -144,7 +144,7 @@ class LandingPageManagementApi extends Controller {
     ))
   }
 
-  def deployToProd(id: String, branch: String) = Action.async { request =>
+  def deployToProd(id: String, branch: Branch) = Action.async { request =>
     LandingPageRepository
       .findOne(id)
       .map { maybeLandingPage =>
@@ -157,7 +157,7 @@ class LandingPageManagementApi extends Controller {
       }
   }
 
-  def deployToStaging(id: String, branch: String) = Action.async { request =>
+  def deployToStaging(id: String, branch: Branch) = Action.async { request =>
     LandingPageRepository
       .findOne(id)
       .map { maybeLandingPage =>

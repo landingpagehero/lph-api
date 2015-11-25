@@ -45,7 +45,7 @@ object LandingPageSubmission {
       BSONDocument(
         "landingPage" -> event.landingPage,
         "submittedData" -> event.submittedData,
-        "environment" -> BSONString(event.environment.envName),
+        "environment" -> BSONString(event.environment.toString),
         "createdAt" -> BSONDateTime(event.createdAt.getMillis)
       )
     }

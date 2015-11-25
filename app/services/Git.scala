@@ -39,7 +39,7 @@ object Git {
    *
    * @return The commit log, or an error message.
    */
-  def getCommits(landingPage: LandingPage, branch: String): String = {
+  def getCommits(landingPage: LandingPage, branch: Branch): String = {
     val gitTarget = getLocalClonePath(landingPage)
 
     val fetchResult = try {
@@ -72,7 +72,7 @@ object Git {
   /**
    * Deploy the landing page's given branch to the given environment.
    */
-  def deploy(landingPage: LandingPage, branch: String, targetEnv: DeploymentEnvironment) = {
+  def deploy(landingPage: LandingPage, branch: Branch, targetEnv: DeploymentEnvironment) = {
     val deployTarget = s"${targetEnv.path}/${landingPage.jobNumber}"
     val from = getLocalClonePath(landingPage)
 
@@ -81,8 +81,8 @@ object Git {
     s"git -C $deployTarget fetch origin" !!;
     s"git -C $deployTarget reset origin/$branch --hard" !!
 
-    LandingPageAuditEventRepository.logEvent(landingPage, s"Deployed to ${targetEnv.envName}", landingPage.getUrlForEnv(targetEnv))
-    Logger.info(s"Deployed landing page ${landingPage.id} to ${targetEnv.envName}. URL is ${landingPage.getUrlForEnv(targetEnv)}")
+    LandingPageAuditEventRepository.logEvent(landingPage, s"Deployed to ${targetEnv}", landingPage.getUrlForEnv(targetEnv))
+    Logger.info(s"Deployed landing page ${landingPage.id} to ${targetEnv}. URL is ${landingPage.getUrlForEnv(targetEnv)}")
   }
 
   private def getLocalClonePath(landingPage: LandingPage): String = {

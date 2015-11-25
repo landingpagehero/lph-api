@@ -20,7 +20,7 @@ object LandingPageSubmissionRepository {
 
   def getSubmissions(landingPageId: String, env: DeploymentEnvironment): Future[List[LandingPageSubmission]] = {
     collection
-      .find(BSONDocument("landingPage" -> BSONObjectID(landingPageId), "environment" -> env.envName))
+      .find(BSONDocument("landingPage" -> BSONObjectID(landingPageId), "environment" -> env.toString))
       .sort(BSONDocument("createdAt" -> -1))
       .cursor[LandingPageSubmission]()
       .collect[List]()

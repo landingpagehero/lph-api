@@ -47,7 +47,7 @@ object LandingPageUserEvent {
       BSONDocument(
         "landingPage" -> event.landingPage,
         "eventType" -> BSONString(event.eventType),
-        "environment" -> BSONString(event.environment.envName),
+        "environment" -> BSONString(event.environment.toString),
         "ipAddress" -> BSONString(event.ipAddress),
         "createdAt" -> BSONDateTime(event.createdAt.getMillis)
       )
