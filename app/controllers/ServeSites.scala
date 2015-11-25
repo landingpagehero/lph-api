@@ -1,25 +1,28 @@
 package controllers
 
 import java.io.File
-
-import models.{DeploymentEnvironment, LandingPageUserEvent}
+import java.nio.charset.StandardCharsets
+import models.{LandingPageSubmission, DeploymentEnvironment, LandingPageUserEvent}
+import play.api.Logger
+import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import reactivemongo.bson.BSONObjectID
-import repository.{LandingPageUserEventRepository, LandingPageRepository}
+import play.modules.reactivemongo.json.BSONFormats
+import play.modules.reactivemongo.json.BSONFormats.{BSONArrayFormat, BSONDocumentFormat}
+import reactivemongo.bson._
+import repository.{LandingPageSubmissionRepository, LandingPageUserEventRepository, LandingPageRepository}
+import org.apache.commons.codec.binary
 
-import scala.concurrent.Future
+import scala.io.Source
 
 class ServeSites extends Controller {
 
   def serveFile(path: String): Action[AnyContent] = Action.async { req: Request[AnyContent] =>
     val pathToServe = if (path == "") "index.html" else path
 
-    // Host is like "[job-number]-[env].lph.dev" - extract the job number.
-    val jobNumber = req.host.split('-').apply(0)
+    val jobNumber = getJobNumberFromRequest(req)
 
-    // Host is like "[job-number]-[env].lph.dev" - extract the env.
-    val env = DeploymentEnvironment.fromString(req.host.split('-').apply(1).split('.').apply(0))
+    val env = getEnvFromRequest(req)
 
     LandingPageRepository.findOneByJobNumberCaseInsensitive(jobNumber)
       .map { maybeLandingPage =>
@@ -43,12 +46,49 @@ class ServeSites extends Controller {
               LandingPageUserEventRepository.insert(landingPageUserEvent)
             }
 
-            Ok.sendFile(fileOnFileSystem, inline = true).withHeaders(
+            if (mimeType == "text/html" && req.cookies.nonEmpty) {
+              val source = Source.fromFile(fileOnFileSystem)
+              var content = try source.mkString finally source.close()
+
+              req.cookies.foreach { cookie => {
+                content = content.replaceAllLiterally(s"{{{ ${cookie.name} }}}", fromBase64(cookie.value))
+                content = content.replaceAllLiterally(s"{{{${cookie.name}}}}", fromBase64(cookie.value))
+              }}
+
+              Ok(content).withHeaders("Content-Type" -> mimeType)
+            }
+            else Ok.sendFile(fileOnFileSystem, inline = true).withHeaders(
               "Content-Type" -> mimeType
             )
           }
         }
       }
+  }
+
+  def recordFormSubmission(path: String) = Action.async { req =>
+    val jobNumber = getJobNumberFromRequest(req)
+    LandingPageRepository.findOneByJobNumberCaseInsensitive(jobNumber).map { maybeLandingPage =>
+      if (maybeLandingPage.isEmpty) NotFound
+      else {
+        val landingPage = maybeLandingPage.get
+
+        val submittedDataToSave =
+          if (req.body.asFormUrlEncoded.isEmpty) Option.empty
+          else Option(req.body.asFormUrlEncoded.get)
+        LandingPageSubmissionRepository.insertSubmission(landingPage, submittedDataToSave, getEnvFromRequest(req))
+
+        if (req.body.asFormUrlEncoded.isEmpty) SeeOther(url = "/" + path)
+        else {
+          var response = SeeOther("/" + path).withCookies()
+          req.body.asFormUrlEncoded.get.foreach({ case (key, values) =>
+            // Cookies values can't have many characters in them, so base 64 encode the value so we can actually
+            // set the cookies regardless of what characters are submitted.
+            response = response.withCookies(new Cookie(key, toBase64(values.head)))
+          })
+          response
+        }
+      }
+    }
   }
 
   private def getMimeTypeForFile(file: File): String = file.getName drop file.getName.lastIndexOf('.') match {
@@ -64,4 +104,17 @@ class ServeSites extends Controller {
     case _ => false
   }
 
+  private def toBase64(value: String): String = binary.Base64.encodeBase64String(value.getBytes(StandardCharsets.UTF_8))
+
+  private def fromBase64(base64: String): String = binary.Base64.decodeBase64(base64).map(_.toChar).mkString
+
+  private def getJobNumberFromRequest(request: Request[_]): String = {
+    // Host is like "[job-number]-[env].lph.dev" - extract the job number.
+    request.host.split('-').apply(0)
+  }
+
+  private def getEnvFromRequest(request: Request[_]): DeploymentEnvironment = {
+    // Host is like "[job-number]-[env].lph.dev" - extract the env.
+    request.host.split('-').apply(1).split('.').apply(0)
+  }
 }

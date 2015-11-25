@@ -19,3 +19,5 @@ DELETE  /management/developers/$id<[a-f0-9]{24}>                controllers.Deve
 
 GET     /serve-sites/                                           controllers.ServeSites.serveFile(path: String = "")
 GET     /serve-sites/$path<.+>                                  controllers.ServeSites.serveFile(path: String)
+POST    /serve-sites/                                           controllers.ServeSites.recordFormSubmission(path: String = "")
+POST    /serve-sites/$path<.+>                                  controllers.ServeSites.recordFormSubmission(path: String)

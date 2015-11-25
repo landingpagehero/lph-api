@@ -33,6 +33,8 @@ case class LandingPage(
     "stagingUrl" -> getStagingUrl
   )
 
+  implicit def toBsonId: BSONObjectID = BSONObjectID(id)
+
   def getProdUrl = s"http://${jobNumber.toLowerCase}-prod.lph-sites.dev/"
 
   def getStagingUrl = s"http://${jobNumber.toLowerCase}-staging.lph-sites.dev/"
