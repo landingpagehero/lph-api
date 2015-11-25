@@ -5,7 +5,7 @@ case class DeploymentEnvironment(envName: String) {
 }
 
 object DeploymentEnvironment {
-  def fromString(envName: String): DeploymentEnvironment = envName match {
+  implicit def fromString(envName: String): DeploymentEnvironment = envName match {
     case "prod" => Prod
     case "staging" => Staging
     case _ => throw new Exception

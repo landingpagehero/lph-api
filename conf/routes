@@ -5,6 +5,7 @@
 GET     /management/landing-pages                               controllers.LandingPageManagementApi.findAll
 GET     /management/landing-pages/$id<[a-f0-9]{24}>             controllers.LandingPageManagementApi.findOne(id: String)
 GET     /management/landing-pages/$id<[a-f0-9]{24}>/audit-log   controllers.LandingPageManagementApi.findOneAuditLog(id: String)
+GET     /management/landing-pages/$id<[a-f0-9]{24}>/user-events/:env          controllers.LandingPageManagementApi.findOneUserEventLog(id: String, env: String)
 GET     /management/landing-pages/$id<[a-f0-9]{24}>/code-changes-log/:branch  controllers.LandingPageManagementApi.findOneCodeChangesLog(id: String, branch: String)
 POST    /management/landing-pages/$id<[a-f0-9]{24}>/deploy/prod/:branch       controllers.LandingPageManagementApi.deployToProd(id: String, branch: String)
 POST    /management/landing-pages/$id<[a-f0-9]{24}>/deploy/staging/:branch    controllers.LandingPageManagementApi.deployToStaging(id: String, branch: String)

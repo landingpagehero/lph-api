@@ -1,9 +1,9 @@
 package controllers
 
-import models.{Staging, Prod, LandingPage}
+import models._
 import play.api.mvc._
 import play.api.libs.json._
-import repository.{LandingPageRepository, LandingPageAuditEventRepository}
+import repository._
 import services.Git
 import scala.concurrent.Future
 import play.api.Logger
@@ -103,6 +103,18 @@ class LandingPageManagementApi extends Controller {
 
         Ok(Json.obj(
           "codeChanges" -> commits
+        ))
+      }
+  }
+
+  /**
+   * Find one landing page's user events log (i.e. page views).
+   */
+  def findOneUserEventLog(id: String, env: String) = Action.async {
+    LandingPageUserEventRepository.getEventLog(id, env)
+      .map { events =>
+        Ok(Json.obj(
+          "events" -> events.map(_.toJson)
         ))
       }
   }

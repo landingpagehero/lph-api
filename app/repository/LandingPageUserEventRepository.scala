@@ -23,7 +23,7 @@ object LandingPageUserEventRepository {
 
   def getEventLog(id: String, env: DeploymentEnvironment): Future[List[LandingPageUserEvent]] = {
     collection
-      .find(BSONDocument("landingPage" -> BSONObjectID(id)))
+      .find(BSONDocument("landingPage" -> BSONObjectID(id), "environment" -> env.envName))
       .sort(BSONDocument("createdAt" -> -1))
       .cursor[LandingPageUserEvent]()
       .collect[List]()
