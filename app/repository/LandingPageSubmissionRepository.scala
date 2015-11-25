@@ -18,9 +18,9 @@ object LandingPageSubmissionRepository {
   private implicit val reader = LandingPageSubmission.LandingPageSubmissionBSONReader
   private implicit val writer = LandingPageSubmission.LandingPageSubmissionBSONWriter
 
-  def getSubmissions(landingPageId: String): Future[List[LandingPageSubmission]] = {
+  def getSubmissions(landingPageId: String, env: DeploymentEnvironment): Future[List[LandingPageSubmission]] = {
     collection
-      .find(BSONDocument("landingPage" -> BSONObjectID(landingPageId)))
+      .find(BSONDocument("landingPage" -> BSONObjectID(landingPageId), "environment" -> env.envName))
       .sort(BSONDocument("createdAt" -> -1))
       .cursor[LandingPageSubmission]()
       .collect[List]()

@@ -10,6 +10,7 @@ GET     /management/landing-pages/$id<[a-f0-9]{24}>/code-changes-log/:branch  co
 POST    /management/landing-pages/$id<[a-f0-9]{24}>/deploy/prod/:branch       controllers.LandingPageManagementApi.deployToProd(id: String, branch: String)
 POST    /management/landing-pages/$id<[a-f0-9]{24}>/deploy/staging/:branch    controllers.LandingPageManagementApi.deployToStaging(id: String, branch: String)
 GET     /management/landing-pages/$id<[a-f0-9]{24}>/code-changes-log/:branch  controllers.LandingPageManagementApi.findOneCodeChangesLog(id: String, branch: String)
+GET     /management/landing-pages/$id<[a-f0-9]{24}>/form-submissions/:env     controllers.LandingPageManagementApi.findOneFormSubmissions(id: String, env: String)
 PUT     /management/landing-pages                               controllers.LandingPageManagementApi.add
 DELETE  /management/landing-pages/$id<[a-f0-9]{24}>             controllers.LandingPageManagementApi.delete(id: String)
 

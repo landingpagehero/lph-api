@@ -120,6 +120,18 @@ class LandingPageManagementApi extends Controller {
   }
 
   /**
+   * Find one landing page's form submissions.
+   */
+  def findOneFormSubmissions(id: String, env: DeploymentEnvironment) = Action.async {
+    LandingPageSubmissionRepository.getSubmissions(id, env)
+      .map { submissions =>
+        Ok(Json.obj(
+          "submissions" -> submissions.map(_.toJson)
+        ))
+      }
+  }
+
+  /**
    * Delete a landing page.
    */
   def delete(id: String) = Action { request =>
