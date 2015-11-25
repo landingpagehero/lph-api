@@ -22,5 +22,6 @@ routesGenerator := InjectedRoutesGenerator
 resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies ++= Seq(
-  "org.reactivemongo" %% "play2-reactivemongo" % "0.11.2.play24"
+  "org.reactivemongo" %% "play2-reactivemongo" % "0.11.2.play24",
+  "org.scalatest" %% "scalatest" % "2.2.4" % "test"
 )
