@@ -77,6 +77,13 @@ class ServeSites extends Controller {
           else Option(req.body.asFormUrlEncoded.get)
         LandingPageSubmissionRepository.insertSubmission(landingPage, submittedDataToSave, getEnvFromRequest(req))
 
+        LandingPageUserEventRepository.insert(new LandingPageUserEvent(
+          landingPage.toBsonId,
+          "Form submitted",
+          getEnvFromRequest(req),
+          req.remoteAddress
+        ))
+
         if (req.body.asFormUrlEncoded.isEmpty) SeeOther(url = "/" + path)
         else {
           var response = SeeOther("/" + path).withCookies()
