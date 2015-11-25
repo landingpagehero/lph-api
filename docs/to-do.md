@@ -6,5 +6,4 @@ To do
 * Set up developer access via SSH keys.
 * Render SCSS as CSS.
 * Render ES6 as ES5.
-* Make host configurable instead of hard-coded lph.dev.
 * Dev tooling: locally render SCSS and CSS and ES6 as ES5.

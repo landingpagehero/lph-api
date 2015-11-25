@@ -1,8 +1,10 @@
 package models
 
 import org.joda.time.DateTime
+import play.api.Play
 import play.api.libs.json.{JsNull, Json}
 import reactivemongo.bson._
+import play.api.Play.current
 import play.modules.reactivemongo.json.BSONFormats._
 
 /**
@@ -35,9 +37,9 @@ case class LandingPage(
 
   implicit def toBsonId: BSONObjectID = BSONObjectID(id)
 
-  def getProdUrl = s"http://${jobNumber.toLowerCase}-prod.lph-sites.dev/"
+  def getProdUrl = s"http://${jobNumber.toLowerCase}-prod.${Play.configuration.getString("lph.host.sites").get}/"
 
-  def getStagingUrl = s"http://${jobNumber.toLowerCase}-staging.lph-sites.dev/"
+  def getStagingUrl = s"http://${jobNumber.toLowerCase}-staging.${Play.configuration.getString("lph.host.sites").get}/"
 
   def getUrlForEnv(env: DeploymentEnvironment) = {
     if (env.getClass == Prod.getClass) getProdUrl
