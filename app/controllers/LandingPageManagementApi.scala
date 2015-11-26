@@ -16,6 +16,8 @@ case class LandingPageForm(jobNumber: String, name: String, gitUri: String) {
   def toLandingPage: LandingPage = LandingPage(jobNumber, name, gitUri)
 }
 
+case class LandingPageEditForm(description: Option[String])
+
 class LandingPageManagementApi extends Controller {
 
   /**
@@ -49,6 +51,34 @@ class LandingPageManagementApi extends Controller {
             "count" -> count
           ))
         }
+      }
+    )
+  }
+
+  /**
+   * Edit a landing page.
+   */
+  def edit(id: String) = Action.async(parse.json) { req =>
+    implicit val formFormat = Json.format[LandingPageEditForm]
+
+    Json.fromJson[LandingPageEditForm](req.body).fold(
+      invalid => Future.successful(BadRequest("Bad landing page form")),
+      valid = form => {
+        LandingPageRepository
+          .findOne(id)
+          .map { maybeLandingPage =>
+            val landingPage = maybeLandingPage.get
+            landingPage.description = form.description
+
+            LandingPageRepository.update(landingPage)
+
+            Logger.info(s"Editing landing page ${landingPage.id}, name ${landingPage.name}")
+            LandingPageAuditEventRepository.logEvent(landingPage, "Edited landing page", s"Name: ${landingPage.name}")
+
+            Ok(Json.obj(
+              "landingPage" -> landingPage.toJson
+            ))
+          }
       }
     )
   }

@@ -16,7 +16,8 @@ case class LandingPage(
                         gitUri: String,
                         id: String = BSONObjectID.generate.stringify,
                         createdAt: DateTime = new DateTime,
-                        var lastFetchedRepoAt: Option[DateTime] = None
+                        var lastFetchedRepoAt: Option[DateTime] = None,
+                        var description: Option[String] = None
                         ) {
   /**
    * Serialize the landing page as JSON.
@@ -32,7 +33,8 @@ case class LandingPage(
       else JsNull
     },
     "prodUrl" -> getProdUrl,
-    "stagingUrl" -> getStagingUrl
+    "stagingUrl" -> getStagingUrl,
+    "description" -> description
   )
 
   implicit def toBsonId: BSONObjectID = BSONObjectID(id)
@@ -58,7 +60,8 @@ object LandingPage {
         document.getAs[BSONString]("gitUri").get.value,
         document.getAs[BSONObjectID]("_id").get.stringify,
         document.getAs[BSONDateTime]("createdAt").map(dt => new DateTime(dt.value)).get,
-        document.getAs[BSONDateTime]("lastFetchedRepoAt").map(dt => new DateTime(dt.value))
+        document.getAs[BSONDateTime]("lastFetchedRepoAt").map(dt => new DateTime(dt.value)),
+        document.getAs[BSONString]("description").map(_.value)
       )
     }
   }
@@ -74,7 +77,8 @@ object LandingPage {
         "lastFetchedRepoAt" -> Option[BSONDateTime](
           if (landingPage.lastFetchedRepoAt.isDefined) BSONDateTime(landingPage.lastFetchedRepoAt.get.getMillis)
           else null
-        )
+        ),
+        "description" -> BSONString(landingPage.description.getOrElse(""))
       )
     }
   }

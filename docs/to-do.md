@@ -13,4 +13,3 @@ To do
 * AJAX form submissions.
 * IDs on forms to recognise which form on the page was submitted.
 * On the backend, show screenshot of the site, to help people remember what site each job number is.
-* On the backend, ability to add descriptions (free text field), e.g. who is building the page, who is the account manager, etc.
