@@ -7,7 +7,6 @@ To do
 * Render SCSS as CSS.
 * Render ES6 as ES5.
 * Dev tooling: locally render SCSS and CSS and ES6 as ES5.
-* Download form submissions as CSV/spreadsheet.
 * "Thank you" email to user who submitted form (e.g. via adding a email.html/email.txt file to the template repository).
 * Tracking JS: ability to track link clicks, modal window clicks.
 * AJAX form submissions.

@@ -10,7 +10,7 @@ object DeploymentEnvironment {
   implicit def fromString(envName: String): DeploymentEnvironment = envName match {
     case "prod" => Prod
     case "staging" => Staging
-    case _ => throw new Exception
+    case _ => play.Logger.error("Unknown env: " + envName); throw new Exception
   }
 }
 

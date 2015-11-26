@@ -1,12 +1,16 @@
 package controllers
 
+import java.io.File
+
+import com.github.tototoshi.csv.CSVWriter
 import models._
 import play.api.mvc._
 import play.api.libs.json._
 import repository._
 import services.Git
 import scala.concurrent.Future
-import play.api.Logger
+import play.api.{Play, Logger}
+import play.api.Play.current
 import play.api.mvc.{Action, Controller}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
@@ -157,6 +161,26 @@ class LandingPageManagementApi extends Controller {
       .map { submissions =>
         Ok(Json.obj(
           "submissions" -> submissions.map(_.toJson)
+        ))
+      }
+  }
+
+  /**
+   * Find one landing page's form submissions.
+   */
+  def downloadOneFormSubmissionsAsCsv(id: String, env: DeploymentEnvironment) = Action.async {
+    LandingPageSubmissionRepository.getSubmissions(id, env)
+      .map { submissions =>
+        val csvFile = new File(s"/home/lph/downloads/$id-${System.currentTimeMillis()}.csv")
+        val writer = CSVWriter.open(csvFile)
+        submissions.foreach { submission =>
+          // @todo - how to do this?
+          writer.writeRow(List(submission.id, submission.createdAt, submission.submittedData))
+        }
+        writer.close()
+
+        Ok(Json.obj(
+          "downloadUrl" -> s"http://${Play.configuration.getString("lph.host.downloads").get}/${csvFile.getName}"
         ))
       }
   }
