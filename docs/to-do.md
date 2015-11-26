@@ -11,4 +11,3 @@ To do
 * Tracking JS: ability to track link clicks, modal window clicks.
 * AJAX form submissions.
 * IDs on forms to recognise which form on the page was submitted.
-* On the backend, show screenshot of the site, to help people remember what site each job number is.
