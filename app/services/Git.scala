@@ -1,5 +1,7 @@
 package services
 
+import java.io.File
+
 import org.joda.time.DateTime
 
 import scala.sys.process._
@@ -79,7 +81,10 @@ object Git {
     s"rm -fr $deployTarget" !!;
     s"cp -R $from $deployTarget" !!;
     s"git -C $deployTarget fetch origin" !!;
-    s"git -C $deployTarget reset origin/$branch --hard" !!
+    s"git -C $deployTarget reset origin/$branch --hard" !!;
+
+    // Compile SCSS to CSS and ES6 to ES5.
+    sys.process.Process(Seq("lph", "build"), new File(deployTarget)) !!
 
     LandingPageAuditEventRepository.logEvent(landingPage, s"Deployed to ${targetEnv}", landingPage.getUrlForEnv(targetEnv))
     Logger.info(s"Deployed landing page ${landingPage.id} to ${targetEnv}. URL is ${landingPage.getUrlForEnv(targetEnv)}")
