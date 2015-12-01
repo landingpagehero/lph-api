@@ -8,3 +8,8 @@ To do
 * Tracking JS: ability to track link clicks, modal window clicks.
 * AJAX form submissions.
 * IDs on forms to recognise which form on the page was submitted.
+* Automatic inclusion of Google Analytics (if possible), and automated tests to ensure its included
+* Multipage test (more than 1 page)
+* 404 link checker
+* Monitoring
+* Promot to production workflow
